@@ -12,17 +12,9 @@ import (
 // deform project create -d '{"_id": "project_name", "name": "My key-value storage"}'
 // http://deformio.github.io/docs/quickstart/#creating-a-token
 
-type data struct {
-	Payload document `json:"payload"`
-}
-
 type document struct {
 	Id    string `json:"_id"`
 	Value string `json:"value"`
-}
-
-type response struct {
-	Result document `json:result`
 }
 
 type DeformError struct {
@@ -64,13 +56,13 @@ func (deform Deform) Get(key string) (string, error) {
 }
 
 func (deform Deform) getValueFromResponseData(responseString string, key string) (string, error) {
-	var responseData response
-	err := json.Unmarshal([]byte(responseString), &responseData)
+	var responseDocument document
+	err := json.Unmarshal([]byte(responseString), &responseDocument)
 	if err != nil {
 		return "", DeformError{Message: err.Error(), Key: key}
 	}
 
-	return responseData.Result.Value, nil
+	return responseDocument.Value, nil
 }
 
 func (deform Deform) getRequest(url string) (*http.Response, error) {
@@ -101,7 +93,7 @@ func (deform Deform) Set(key string, value string) error {
 }
 
 func (deform Deform) unsafeRequest(method string, url string, doc document) (*http.Response, error) {
-	jsonData, err := json.Marshal(data{Payload: doc})
+	jsonData, err := json.Marshal(doc)
 	if err != nil {
 		return nil, err
 	}
